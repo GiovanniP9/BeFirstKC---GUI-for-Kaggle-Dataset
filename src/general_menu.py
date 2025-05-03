@@ -37,13 +37,13 @@ class Menu:
                 method_name = list(self.methods.keys())[choice - 1]
                 method = self.methods[method_name]
 
-                # Gestisci input degli argomenti
+                # Manage inputs
                 sig = inspect.signature(method)
                 if len(sig.parameters) == 0:
-                    # Metodo senza parametri
+                    # Method without parameters
                     result = method()
                 else:
-                    # Metodo con parametri
+                    # Method with parameters
                     args = []
                     for param in sig.parameters.values():
                         user_input = input(f"Inserisci valore per '{param.name}' ({param.annotation if param.annotation != param.empty else 'str'}): ")
@@ -56,7 +56,7 @@ class Menu:
                 print("Scelta non valida. Riprova.")
 
     def cast_input(self, value, annotation):
-        """Tenta di convertire l'input utente nel tipo giusto."""
+        """Converts the user input into the right type."""
         if annotation == int:
             return int(value)
         elif annotation == float:
@@ -69,13 +69,10 @@ class Menu:
 """
 ========== USE CASE ==========
 
-# Instanzia l'oggetto
-calc = Calcolatrice()
-
-# Crea il menu
+# Create Menu
 menu = Menu(calc)
 
-# Esegui il menu
+# Execute Menu
 menu.select_and_execute()
 
 """
