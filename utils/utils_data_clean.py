@@ -9,6 +9,7 @@ if not logger.handlers:
     ch.setFormatter(logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s'))
     logger.addHandler(ch)
 
+
 def log_method(func):
     """Log the execution of DataFrameCleaner methods."""
     @wraps(func)
@@ -16,6 +17,7 @@ def log_method(func):
         logger.info(f"Running {func.__name__}")
         return func(*args, **kwargs)
     return wrapper
+
 
 def validate_columns_exist(func):
     """Decorator to validate that specified columns exist in the DataFrame."""

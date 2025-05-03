@@ -10,7 +10,6 @@ if not logger.handlers:
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-# --- Decorators ---
 
 def log_method(func):
     """Log the execution of EDA methods."""
@@ -21,6 +20,7 @@ def log_method(func):
         logger.info(f"Finished {func.__name__}")
         return result
     return wrapper
+
 
 def validate_column_exists(func):
     """Check if provided columns exist in the dataframe."""

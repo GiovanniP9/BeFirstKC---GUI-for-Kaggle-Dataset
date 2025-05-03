@@ -11,6 +11,7 @@ if not logger.handlers:
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
+
 def log_method(func):
     """Log the start and end of a method call."""
     @wraps(func)
@@ -20,6 +21,7 @@ def log_method(func):
         logger.info(f"Finished {func.__name__}")
         return result
     return wrapper
+
 
 def validate_column_exists(func):
     """Ensure the specified column exists in the dataframe."""

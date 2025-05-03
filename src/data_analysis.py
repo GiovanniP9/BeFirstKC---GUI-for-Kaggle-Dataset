@@ -10,19 +10,38 @@ from abstract_interfaces import AbstractStatisticalAnalyzer
 class StatisticalAnalyzer(AbstractStatisticalAnalyzer):
     """
     Perform basic and advanced statistical analyses on a pandas DataFrame.
+    
+    Includes methods for descriptive statistics, missing value analysis, 
+    correlation analysis, distribution visualization, and outlier detection.
     """
 
     def __init__(self, dataframe: pd.DataFrame):
+        """
+        Initialize the analyzer with a DataFrame.
+        
+        Parameters:
+        - dataframe (pd.DataFrame): The dataset to analyze.
+        """
         self.df = dataframe
 
     @log_method
     def describe_data(self):
-        """Return summary statistics for all numerical columns."""
+        """
+        Return summary statistics for all numerical columns.
+
+        Returns:
+        - pd.DataFrame: Summary statistics including count, mean, std, min, max, quartiles.
+        """
         return self.df.describe()
 
     @log_method
     def missing_values_summary(self):
-        """Return count and percentage of missing values per column."""
+        """
+        Return the number and percentage of missing values for each column.
+
+        Returns:
+        - pd.DataFrame: Table with columns 'Missing Count' and 'Missing Percentage'.
+        """
         missing_count = self.df.isnull().sum()
         missing_percent = (missing_count / len(self.df)) * 100
         return pd.DataFrame({
@@ -32,7 +51,16 @@ class StatisticalAnalyzer(AbstractStatisticalAnalyzer):
 
     @log_method
     def correlation_matrix(self, method='pearson', plot=False):
-        """Compute correlation matrix and optionally plot it."""
+        """
+        Compute the correlation matrix and optionally display a heatmap.
+
+        Parameters:
+        - method (str): Correlation method ('pearson', 'spearman', or 'kendall').
+        - plot (bool): If True, displays a seaborn heatmap of the matrix.
+
+        Returns:
+        - pd.DataFrame: Correlation matrix.
+        """
         corr = self.df.corr(method=method)
         if plot:
             plt.figure(figsize=(10, 8))
@@ -44,7 +72,12 @@ class StatisticalAnalyzer(AbstractStatisticalAnalyzer):
     @log_method
     @validate_column_exists
     def distribution_plot(self, column: str):
-        """Plot the distribution of a specified numerical column."""
+        """
+        Plot the distribution of a specified numerical column using a histogram with KDE.
+
+        Parameters:
+        - column (str): Column name to plot.
+        """
         sns.histplot(self.df[column].dropna(), kde=True)
         plt.title(f'Distribution of {column}')
         plt.xlabel(column)
@@ -53,7 +86,12 @@ class StatisticalAnalyzer(AbstractStatisticalAnalyzer):
 
     @log_method
     def skewness_kurtosis(self):
-        """Return skewness and kurtosis of all numerical columns."""
+        """
+        Calculate skewness and kurtosis for all numerical columns.
+
+        Returns:
+        - pd.DataFrame: Skewness and kurtosis values for each column.
+        """
         return pd.DataFrame({
             'Skewness': self.df.skew(numeric_only=True),
             'Kurtosis': self.df.kurtosis(numeric_only=True)
@@ -63,9 +101,17 @@ class StatisticalAnalyzer(AbstractStatisticalAnalyzer):
     @validate_column_exists
     def outlier_summary(self, column: str, method='iqr'):
         """
-        Detect outliers in a column using IQR or Z-score method.
+        Identify outliers in a column using IQR or Z-score methods.
+
+        Parameters:
+        - column (str): Column name to analyze.
+        - method (str): Method to use: 'iqr' or 'zscore'.
+
+        Returns:
+        - pd.Series: Outlier values in the specified column.
         """
         data = self.df[column].dropna()
+
         if method == 'iqr':
             Q1 = np.percentile(data, 25)
             Q3 = np.percentile(data, 75)
@@ -82,7 +128,13 @@ class StatisticalAnalyzer(AbstractStatisticalAnalyzer):
 
     @log_method
     def categorical_summary(self):
-        """Return count and percentage summary for categorical columns."""
+        """
+        Generate count and percentage summaries for all categorical columns.
+
+        Returns:
+        - dict[str, pd.DataFrame]: Dictionary with column names as keys and
+          DataFrames as values showing 'Count' and 'Percentage'.
+        """
         summaries = {}
         cat_cols = self.df.select_dtypes(include=['object', 'category']).columns
         for col in cat_cols:
