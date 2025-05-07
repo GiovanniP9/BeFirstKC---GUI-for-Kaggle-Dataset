@@ -74,7 +74,6 @@ y = train_data['Price']
 
 features = ['Brand', 'Material', 'Size', 'Compartments', 'Laptop Compartment', 'Waterproof' ]
 
-test_data_cleaned = test_data.dropna(axis=0) # remove rows with missing values
 
 X = train_data[features]
 X_test = test_data[features]
@@ -96,7 +95,7 @@ print(f"MAE: {mae:.2f}")
 rmse = np.sqrt(mean_absolute_error(y_val, preds))
 print(f"RMSE: {rmse:.2f}")
 
-test_preds = model.predict(X_test_encoded.loc[test_data_cleaned.index])
-submission = pd.DataFrame({'id': test_data_cleaned['id'], 'Price': test_preds})
+test_preds = model.predict(X_test_encoded.loc[test_data.index])
+submission = pd.DataFrame({'id': test_data['id'], 'Price': test_preds})
 submission.to_csv('submission.csv', index=False)
 print("Submission file created.")
