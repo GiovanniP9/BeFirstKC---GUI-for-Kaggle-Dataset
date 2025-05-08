@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import optuna
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from xgboost import XGBRegressor
@@ -86,7 +86,7 @@ def prepare_and_scale_features(train_df, test_df, features):
 
 # --- 3) Funzioni di tuning per XGB e LightGBM ---
 # Funzione per il tuning di XGBoost
-def tune_xgb(X_train, X_val, y_train, y_val, n_trials=50):
+def tune_xgb(X_train, X_val, y_train, y_val, n_trials=15):
     def obj(trial):
         # Definizione dello spazio dei parametri
         params = {
@@ -109,7 +109,7 @@ def tune_xgb(X_train, X_val, y_train, y_val, n_trials=50):
     return study.best_params
 
 # Funzione per il tuning di LightGBM
-def tune_lgbm(X_train, X_val, y_train, y_val, n_trials=50):
+def tune_lgbm(X_train, X_val, y_train, y_val, n_trials=15):
     def obj(trial):
         # Definizione dello spazio dei parametri
         params = {
@@ -175,9 +175,7 @@ if __name__ == '__main__':
     # Costruzione dei modelli con parametri ottimizzati e modelli di riferimento
     models = {
         'XGB': XGBRegressor(**best_xgb, random_state=42),
-        'LightGBM': LGBMRegressor(**best_lgb, random_state=42),
-        'RandomForest': RandomForestRegressor(n_estimators=100, random_state=42),
-        'GradientBoosting': GradientBoostingRegressor(n_estimators=100, random_state=42)
+        'LightGBM': LGBMRegressor(**best_lgb, random_state=42)
     }
 
     # Valutazione e selezione del migliore
