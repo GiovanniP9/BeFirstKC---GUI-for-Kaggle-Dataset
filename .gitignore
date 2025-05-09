@@ -9,6 +9,9 @@ __pycache__/
 # Ignore csv folder
 csv/
 
+# Ignore server folder
+server/
+
 # C extensions
 *.so
 

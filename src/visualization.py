@@ -1,20 +1,25 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from src.abstract_interfaces import AbstractVisualization
+from utils.log_config import log_method 
 
 
-class Visualization:
-    def __init__(self, df):
+class Visualization(AbstractVisualization):
+    """ Classe per la visualizzazione dei dati."""
+    def __init__(self, df: pd.DataFrame):
         # Inizializza la classe con un DataFrame
-        self.df = df
-        
+        self.df = df.copy()
+    
+    @log_method
     def split_numerical_categorical(self):
         # Divide il DataFrame in due: uno con variabili numeriche e uno con variabili categoriche
         df_num = self.df.select_dtypes(include=['int64', 'float64'])
         df_cat = self.df.select_dtypes(include=['object', 'category'])
         return df_num, df_cat
     
-    def histplot(self, df):
+    @log_method
+    def histplot(self, df: pd.DataFrame):
         # Crea istogrammi per tutte le colonne del DataFrame passato
         all_cols = df.columns
         n_cols = 3  # Numero di colonne nel layout dei subplot
@@ -38,8 +43,9 @@ class Visualization:
         plt.tight_layout()
         plt.subplots_adjust(hspace=0.5, wspace=0.4)  # Spaziatura tra i grafici
         plt.show()
-        
-    def boxplot(self, df):
+    
+    @log_method
+    def boxplot(self, df: pd.DataFrame):
         # Crea boxplot per tutte le variabili numeriche
         df_num, df_cat = self.split_numerical_categorical()
 
@@ -59,8 +65,9 @@ class Visualization:
 
         plt.tight_layout()
         plt.show()
-
-    def correlation_matrix(self, df):
+    
+    @log_method
+    def correlation_matrix(self, df: pd.DataFrame):
         # Crea una matrice di correlazione tra variabili numeriche
         df_num, df_cat = self.split_numerical_categorical()
 
@@ -70,7 +77,8 @@ class Visualization:
         plt.title("Correlation Matrix")
         plt.show()
     
-    def violin_plot(self, df):
+    @log_method
+    def violin_plot(self, df: pd.DataFrame):
         # Crea violin plot per tutte le variabili numeriche
         df_num, df_cat = self.split_numerical_categorical()
 
@@ -90,14 +98,3 @@ class Visualization:
 
         plt.tight_layout()
         plt.show()
-
-# Carica il dataset da un file CSV
-df = pd.read_csv(r'C:\Users\pasti\Documents\GitHub\Progetto_Finale_Corso_Python\train_clean.csv')
-
-# Crea un oggetto della classe Visualization e mostra gli istogrammi
-visual1 = Visualization(df)
-visual1.histplot(df)
-#visual1.correlation_matrix(df)
-#visual1.boxplot(df)
-#visual1.violin_plot(df)
-
