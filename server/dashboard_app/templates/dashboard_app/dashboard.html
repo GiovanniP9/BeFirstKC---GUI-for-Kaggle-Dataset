@@ -1,0 +1,6 @@
+<h1>Dashboard - Strumenti disponibili</h1>
+<ul>
+    {% for tool in tools %}
+        <li><a href="{% url 'tool_panel' tool %}">{{ tool|title }}</a></li>
+    {% endfor %}
+</ul>

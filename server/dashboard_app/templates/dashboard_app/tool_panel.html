@@ -1,0 +1,44 @@
+<h1>{{ tool|title }} - Pulsantiera</h1>
+
+{% if error %}
+    <p style="color: red;">Errore: {{ error }}</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <label for="method">Seleziona Metodo:</label>
+    <select name="method" id="method" onchange="this.form.submit()">
+        <option value="">--Seleziona--</option>
+        {% for method in methods %}
+            <option value="{{ method }}" {% if method == selected_method %}selected{% endif %}>{{ method }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+{% if selected_method %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="method" value="{{ selected_method }}">
+        <h2>Parametri per {{ selected_method }}:</h2>
+        {% for name, param in params.items %}
+            {% if name != 'self' %}
+                <label for="{{ name }}">{{ name }}:</label>
+                <input type="text" name="{{ name }}" id="{{ name }}"><br/>
+            {% endif %}
+        {% endfor %}
+        <button type="submit">Esegui</button>
+    </form>
+{% endif %}
+
+{% if output %}
+    <h3>Output:</h3>
+    {% if output_type == 'table' %}
+        {{ output|safe }}
+    {% elif output_type == 'image' %}
+        <img src="data:image/png;base64,{{ output }}" />
+    {% else %}
+        <pre>{{ output }}</pre>
+    {% endif %}
+{% endif %}
+
+<a href="{% url 'dashboard' %}">← Torna alla dashboard</a>
