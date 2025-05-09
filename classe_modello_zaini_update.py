@@ -50,7 +50,7 @@ class DataCleaner:
             mask_ok = df_raw[col].notnull()
             X = df_enc.loc[mask_ok].drop(columns=[c for c in exclude + [col] if c in df_enc])
             y = df_raw.loc[mask_ok, col]
-            if df_raw[col].dtype == object or col in df_enc.select_dtypes(include=['int', 'float']).columns and y.dtype == object:
+            if df_raw[col].dtype == object or (col in df_enc.select_dtypes(include=['int', 'float']).columns and y.dtype == object):
                 le_y = LabelEncoder().fit(y.astype(str))
                 clf = RandomForestClassifier(n_estimators=100, random_state=42)
                 clf.fit(X, le_y.transform(y.astype(str)))
@@ -271,14 +271,24 @@ class Pipeline:
         self.preprocessor = FeaturePreprocessor(self.features)
 
     def run(self):
+        # Carica training e test puliti
         train_df = self.cleaner.prepare_train()
         test_df = self.cleaner.prepare_test()
+
+        # Carica dataset extra imputed per il modello deep learning
+        extra_df = pd.read_csv('csv/train_extra_imputed.csv')
+
+        # Preprocess per modelli non DL
         X_train, X_val, y_train, y_val, X_test, ids = \
             self.preprocessor.transform(train_df, test_df)
 
-        print("\n=== Addestramento Deep Learning ===")
+        # Preprocess per modello DL usando extra_df
+        X_train_dl, X_val_dl, y_train_dl, y_val_dl, _, _ = \
+            self.preprocessor.transform(extra_df, test_df)
+
+        print("\n=== Addestramento Deep Learning con train_extra_imputed.csv ===")
         dl_model = DeepLearning(
-            input_dim=X_train.shape[1],
+            input_dim=X_train_dl.shape[1],
             layers_units=[128, 64, 32],
             dropout_rates=[0.3, 0.2, 0.1],
             epochs=50,
@@ -286,9 +296,9 @@ class Pipeline:
             patience=10,
             model_path='models/dl_model'
         )
-        dl_model.fit(X_train, y_train, X_val, y_val)
-        dl_results = dl_model.evaluate(X_val, y_val)
-        
+        dl_model.fit(X_train_dl, y_train_dl, X_val_dl, y_val_dl)
+        dl_results = dl_model.evaluate(X_val_dl, y_val_dl)
+
         print("\n=== Ottimizzazione XGBoost ===")
         xgb_space = {
             'n_estimators': {'type': 'int', 'bounds': (50, 300)},
@@ -320,12 +330,8 @@ class Pipeline:
         class DLWrapper:
             def __init__(self, dl_model):
                 self.dl_model = dl_model
-                
-            def fit(self, X, y):
-                pass
-                
-            def predict(self, X):
-                return self.dl_model.predict(X)
+            def fit(self, X, y): pass
+            def predict(self, X): return self.dl_model.predict(X)
 
         print("\n=== Valutazione comparativa dei modelli ===")
         models = {
@@ -333,18 +339,16 @@ class Pipeline:
             'LightGBM': LGBMRegressor(**best_lgb, random_state=42),
             'DeepLearning': DLWrapper(dl_model)
         }
-        
         results = ModelEvaluator.evaluate(models, X_train, y_train, X_val, y_val)
         best_name = min(results, key=lambda k: results[k]['RMSE'])
         print(f"Il miglior modello è {best_name}")
-        
+
         if best_name == 'DeepLearning':
             preds = dl_model.predict(X_test)
             dl_model.save()
         else:
-            best_model = models[best_name]
-            preds = best_model.predict(X_test)
-        
+            preds = models[best_name].predict(X_test)
+
         submission = pd.DataFrame({'id': ids, 'Price': preds})
         os.makedirs('csv', exist_ok=True)
         submission.to_csv('csv/submission.csv', index=False)
