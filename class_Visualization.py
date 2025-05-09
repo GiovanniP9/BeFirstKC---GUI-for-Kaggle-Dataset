@@ -16,7 +16,7 @@ class Visualization:
         n_cols = 3
         n_rows = (len(all_cols) + n_cols - 1) // n_cols
         
-        fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows))
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, 4 * n_rows))
         axes = axes.flatten()
         
         for i, col in enumerate(all_cols):
@@ -30,6 +30,7 @@ class Visualization:
             fig.delaxes(axes[j])
         
         plt.tight_layout()
+        plt.subplots_adjust(hspace=0.5, wspace=0.4)  # Adjust spacing between subplots
         plt.show()
         
     def boxplot(self, df):
@@ -82,7 +83,7 @@ class Visualization:
 df = pd.read_csv(r'C:\Users\pasti\Documents\GitHub\Progetto_Finale_Corso_Python\train_clean.csv')
         
 visual1 = Visualization(df)
-#visual1.histplot(df)
+visual1.histplot(df)
 #visual1.correlation_matrix(df)
 #visual1.boxplot(df)
 #visual1.violin_plot(df)
