@@ -200,3 +200,25 @@ class AbstractStatisticalAnalyzer(ABC):
     @abstractmethod
     def categorical_summary(self):
         pass
+    
+
+class AbstractVisualization(ABC):
+    """ Abstract interface for data visualization. """
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
+
+    @abstractmethod
+    def histplot(self, df: pd.DataFrame):
+        pass
+
+    @abstractmethod
+    def boxplot(self, df: pd.DataFrame):
+        pass
+
+    @abstractmethod
+    def correlation_matrix(self, df: pd.DataFrame):
+        pass
+
+    @abstractmethod
+    def violin_plot(self, df: pd.DataFrame):
+        pass
