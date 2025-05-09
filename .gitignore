@@ -3,12 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Ignore csv files
-*.csv
-
-# Ignore csv folder
-csv/
-
 # Ignore server folder
 server/
 
