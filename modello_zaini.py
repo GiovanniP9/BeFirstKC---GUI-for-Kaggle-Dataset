@@ -10,7 +10,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 
-# Paths per salvataggio
+# Definizione dei percorsi per i file di input/output
 TRAIN_PATH = 'csv/train.csv'
 TEST_PATH = 'csv/test.csv'
 CLEAN_TRAIN_CSV = 'csv/train_cleaned.csv'
@@ -18,6 +18,7 @@ CLEAN_TEST_CSV = 'csv/test_cleaned.csv'
 ENCODERS_PKL = 'models/encoders.pkl'
 
 # --- STEP 1: Pulizia - Encoding categoriali ---
+# Funzione per codificare le colonne categoriali utilizzando LabelEncoder
 def encode_categoricals(df, encoders=None):
     out_encoders = {} if encoders is None else encoders.copy()
     for col in df.select_dtypes(include=['object']).columns:
@@ -33,6 +34,7 @@ def encode_categoricals(df, encoders=None):
     return df, out_encoders
 
 # --- STEP 2: Pulizia - Imputazione valori mancanti train ---
+# Funzione per imputare valori mancanti nel dataset di training
 def impute_missing_values(orig_df, enc_df, cols_to_fill):
     imputers = {}
     exclude = ['id', 'Price']
@@ -72,6 +74,7 @@ def impute_missing_values(orig_df, enc_df, cols_to_fill):
     return orig_df, imputers
 
 # --- STEP 3: Caching clean train (solo encoder) ---
+# Funzione per caricare o preparare il dataset di training pulito
 def load_or_prepare_clean_data(train_path, cleaned_path, cols_to_fill):
     # Caricamento se esistono train pulito e encoder
     if os.path.exists(cleaned_path) and os.path.exists(ENCODERS_PKL):
@@ -102,6 +105,7 @@ def load_or_prepare_clean_data(train_path, cleaned_path, cols_to_fill):
     return clean_df, encoders, imputers
 
 # --- STEP 4: Caching clean test ---
+# Funzione per caricare o preparare il dataset di test pulito
 def load_or_prepare_clean_test(test_path, clean_test_path, encoders, imputers, cols_to_fill):
     if os.path.exists(clean_test_path):
         print("Carico test clean...")
@@ -115,6 +119,7 @@ def load_or_prepare_clean_test(test_path, clean_test_path, encoders, imputers, c
     return test_df
 
 # --- STEP 5: Imputazione test set ---
+# Funzione per imputare valori mancanti nel dataset di test
 def impute_test_values(test_df, encoders, imputers, cols_to_fill):
     enc_test_df = test_df.copy()
     for col, le in encoders.items():
@@ -135,6 +140,7 @@ def impute_test_values(test_df, encoders, imputers, cols_to_fill):
     return test_df
 
 # --- STEP 6: Preprocessing & scaling ---
+# Funzione per preparare e scalare le feature per il training e il test
 def prepare_and_scale_features(train_df, test_df, features):
     X_tr_raw = train_df[features]
     y_train = train_df['Price']
@@ -152,6 +158,7 @@ def prepare_and_scale_features(train_df, test_df, features):
     return X_train_s, X_val_s, y_tr, y_val, X_test_s, ids
 
 # --- STEP 7: Hyperparameter tuning ---
+# Funzione per ottimizzare gli iperparametri di XGBoost
 def tune_xgb(X_train, X_val, y_train, y_val, n_trials=15):
     def objective(trial):
         params = {
@@ -172,6 +179,7 @@ def tune_xgb(X_train, X_val, y_train, y_val, n_trials=15):
     study.optimize(objective, n_trials=n_trials)
     return study.best_params
 
+# Funzione per ottimizzare gli iperparametri di LightGBM
 def tune_lgbm(X_train, X_val, y_train, y_val, n_trials=15):
     def objective(trial):
         params = {
@@ -193,6 +201,7 @@ def tune_lgbm(X_train, X_val, y_train, y_val, n_trials=15):
     return study.best_params
 
 # --- STEP 8: Valutazione modelli ---
+# Funzione per valutare le performance dei modelli
 def evaluate_models(models, X_train, X_val, y_train, y_val):
     results = {}
     for name, model in models.items():
@@ -205,6 +214,7 @@ def evaluate_models(models, X_train, X_val, y_train, y_val):
     return results
 
 # --- STEP 9: Creazione submission ---
+# Funzione per creare il file di submission
 def create_submission(model, X_test, ids, output_path='csv/submission.csv'):
     preds = model.predict(X_test)
     pd.DataFrame({'id': ids, 'Price': preds}).to_csv(output_path, index=False)
@@ -212,39 +222,43 @@ def create_submission(model, X_test, ids, output_path='csv/submission.csv'):
 
 # --- MAIN ---
 if __name__ == '__main__':
+    # Definizione delle colonne da imputare e delle feature
     cols_to_fill = ["Brand","Material","Size","Compartments",
                     "Laptop Compartment","Waterproof","Style",
                     "Color","Weight Capacity (kg)"]
     features = cols_to_fill.copy()
 
-    # Load o pulizia train (only encoders saved)
+    # Caricamento o pulizia del dataset di training
     train_df, encoders, imputers = load_or_prepare_clean_data(
         TRAIN_PATH, CLEAN_TRAIN_CSV, cols_to_fill
     )
-    # Load o pulizia test
+
+    # Caricamento o pulizia del dataset di test
     test_df = load_or_prepare_clean_test(
         TEST_PATH, CLEAN_TEST_CSV, encoders, imputers, cols_to_fill
     )
 
-    # Preprocessing e scaling
+    # Preprocessing e scaling delle feature
     X_train, X_val, y_train, y_val, X_test, test_ids = prepare_and_scale_features(
         train_df, test_df, features
     )
 
-    # Hyperparam tuning
+    # Ottimizzazione degli iperparametri per XGBoost e LightGBM
     best_xgb = tune_xgb(X_train, X_val, y_train, y_val)
     best_lgb = tune_lgbm(X_train, X_val, y_train, y_val)
 
-    # Costruzione e valutazione modelli
+    # Costruzione e valutazione dei modelli
     models = {
         'XGB': XGBRegressor(**best_xgb, random_state=42),
         'LightGBM': LGBMRegressor(**best_lgb, random_state=42)
     }
     results = evaluate_models(models, X_train, X_val, y_train, y_val)
+
+    # Selezione del miglior modello in base all'RMSE
     best_name = min(results, key=lambda k: results[k]['RMSE'])
     print(f"Best model: {best_name}")
 
-    # Creazione submission
+    # Creazione del file di submission
     create_submission(models[best_name], X_test, test_ids)
 
 
