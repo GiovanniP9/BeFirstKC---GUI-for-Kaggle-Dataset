@@ -4,8 +4,9 @@ from sklearn.base import BaseEstimator
 
 
 class AbstractDataFrameCleaner(ABC):
-    """Interface for a pandas dataframe cleaner"""
-    
+    """
+    Abstract Interface for a pandas dataframe cleaner.
+    """
     @abstractmethod
     def drop_missing(self, axis=0, how='any', thresh=None, subset=None): 
         pass
@@ -40,7 +41,9 @@ class AbstractDataFrameCleaner(ABC):
 
     
 class AbstractStatisticalAnalyser(ABC):
-
+    """
+    Abstract interface for statistical analysis class on a pandas DataFrame.
+    """
     @abstractmethod
     def describe_data(self):
         pass
@@ -74,13 +77,6 @@ class AbstractEDA(ABC):
     """
     Abstract base class for Exploratory Data Analysis (EDA).
     """
-
-    def __init__(self, dataframe: pd.DataFrame):
-        """
-        Initialize with a pandas DataFrame.
-        """
-        self.df = dataframe
-
     @abstractmethod
     def check_basic_info(self):
         pass
@@ -114,13 +110,6 @@ class AbstractPreprocessor(ABC):
     """
     Abstract base class for data preprocessing before model training.
     """
-
-    def __init__(self, dataframe: pd.DataFrame):
-        """
-        Initialize with a pandas DataFrame.
-        """
-        self.df = dataframe
-
     @abstractmethod
     def fill_missing(self, strategy='mean'):
         pass
@@ -150,7 +139,6 @@ class AbstractModelManager(ABC):
     """
     Abstract base class for ML model management.
     """
-
     @abstractmethod
     def load_data(self, data_source, target_column, loader_func=pd.read_csv, **loader_kwargs):
         pass
@@ -179,3 +167,27 @@ class AbstractModelManager(ABC):
     def evaluate_model(self, metrics=None, **predict_kwargs):
         pass
     
+
+class AbstractVisualization(ABC):
+    """
+    Abstract interface for data visualization class.
+    """
+    @abstractmethod
+    def split_numerical_categorical(self):
+        pass
+    
+    @abstractmethod
+    def histplot(self):
+        pass
+    
+    @abstractmethod
+    def boxplot(self):
+        pass
+    
+    @abstractmethod
+    def correlation_matrix(self):
+        pass
+    
+    @abstractmethod
+    def violin_plot(self):
+        pass
