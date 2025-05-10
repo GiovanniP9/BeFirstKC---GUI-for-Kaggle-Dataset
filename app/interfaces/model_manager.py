@@ -3,9 +3,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
-from utils.utils_statistical_learning import (logger, log_method, require_data, 
+from app.utils.utils_model_manager import (logger, log_method, require_data, 
                                               require_model, require_split)
-from abstract_interfaces import AbstractModelManager
+from app.abstract.abstract_interfaces import AbstractModelManager
 
 
 class ModelManager(AbstractModelManager):

@@ -3,11 +3,11 @@ import numpy as np
 import scipy.stats as stats
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils.utils_data_analysis import log_method, validate_column_exists
-from abstract_interfaces import AbstractStatisticalAnalyzer
+from app.utils.utils_statistics import log_method, validate_column_exists
+from app.abstract.abstract_interfaces import AbstractStatisticalAnalyser
 
 
-class StatisticalAnalyzer(AbstractStatisticalAnalyzer):
+class StatisticalAnalyser(AbstractStatisticalAnalyser):
     """
     Perform basic and advanced statistical analyses on a pandas DataFrame.
     

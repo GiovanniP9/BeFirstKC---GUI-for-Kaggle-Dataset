@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from utils.utils_data_clean import log_method, validate_columns_exist
-from abstract_interfaces import AbstractDataFrameCleaner
+from app.utils.utils_cleaner import log_method, validate_columns_exist
+from app.abstract.abstract_interfaces import AbstractDataFrameCleaner
 
 
 class DataFrameCleaner(AbstractDataFrameCleaner):

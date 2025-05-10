@@ -1,8 +1,8 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils.utils_eda_helper import log_method, validate_column_exists
-from abstract_interfaces import AbstractEDA
+from app.utils.utils_eda import log_method, validate_column_exists
+from app.abstract.abstract_interfaces import AbstractEDA
 
 
 class EDA(AbstractEDA):

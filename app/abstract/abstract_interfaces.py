@@ -38,38 +38,8 @@ class AbstractDataFrameCleaner(ABC):
     def to_csv(self, path, index=False): 
         pass
 
-
-class AbstractEDA(ABC):
     
-    @abstractmethod
-    def check_basic_info(self): 
-        pass
-
-    @abstractmethod
-    def summarize_numerical(self): 
-        pass
-
-    @abstractmethod
-    def summarize_categorical(self): 
-        pass
-
-    @abstractmethod
-    def plot_histograms(self, columns=None): 
-        pass
-
-    @abstractmethod
-    def plot_boxplots(self, columns=None): 
-        pass
-
-    @abstractmethod
-    def plot_correlation_matrix(self): 
-        pass
-
-    @abstractmethod
-    def plot_target_relations(self, target): 
-        pass
-    
-class AbstractStatisticalAnalyzer(ABC):
+class AbstractStatisticalAnalyser(ABC):
 
     @abstractmethod
     def describe_data(self):
@@ -100,7 +70,7 @@ class AbstractStatisticalAnalyzer(ABC):
         pass
     
 
-
+class AbstractEDA(ABC):
     """
     Abstract base class for Exploratory Data Analysis (EDA).
     """
@@ -209,34 +179,3 @@ class AbstractModelManager(ABC):
     def evaluate_model(self, metrics=None, **predict_kwargs):
         pass
     
-    
-class AbstractStatisticalAnalyzer(ABC):
-    """Interface for statistical analysis of a pandas DataFrame."""
-
-    @abstractmethod
-    def describe_data(self):
-        pass
-
-    @abstractmethod
-    def missing_values_summary(self):
-        pass
-
-    @abstractmethod
-    def correlation_matrix(self, method='pearson', plot=False):
-        pass
-
-    @abstractmethod
-    def distribution_plot(self, column: str):
-        pass
-
-    @abstractmethod
-    def skewness_kurtosis(self):
-        pass
-
-    @abstractmethod
-    def outlier_summary(self, column: str, method='iqr'):
-        pass
-
-    @abstractmethod
-    def categorical_summary(self):
-        pass
