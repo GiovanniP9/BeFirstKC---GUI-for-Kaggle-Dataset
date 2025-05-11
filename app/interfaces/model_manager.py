@@ -3,24 +3,30 @@ from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
-from app.utils.utils_model_manager import (logger, log_method, require_data, 
-                                              require_model, require_split)
+from app.utils.utils_model_manager import (
+    logger, log_method, require_data, 
+    require_model, require_split
+)
 from app.abstract.abstract_interfaces import AbstractModelManager
 
 
 class ModelManager(AbstractModelManager):
     """
-    Manages the complete machine learning workflow, including:
-    data loading, preprocessing, model training, and evaluation.
+    Manages the full machine learning workflow: loading data, 
+    preprocessing, model training, and evaluation.
     """
 
     def __init__(self, model: BaseEstimator = None, scaler: object = None):
         """
-        Initialize the manager with an optional model and scaler.
-        
-        Parameters:
-        - model (BaseEstimator): Scikit-learn compatible model instance.
-        - scaler (object): Preprocessing scaler (default: StandardScaler).
+        Initialize the ModelManager with optional model and scaler.
+
+        Parameters
+        ----------
+        model : BaseEstimator, optional
+            A scikit-learn compatible estimator.
+        scaler : object, optional
+            A scaler implementing `fit_transform` and `transform`.
+            Defaults to `StandardScaler`.
         """
         self.model = model
         self.scaler = scaler or StandardScaler()
@@ -29,15 +35,25 @@ class ModelManager(AbstractModelManager):
         self.y_train = self.y_test = None
 
     @log_method
-    def load_data(self, data_source, target_column: str, loader_func=pd.read_csv, **loader_kwargs):
+    def load_data(self, data_source, target_column: str, loader_func=pd.read_csv, **loader_kwargs) -> None:
         """
-        Load data from a source and split it into features and target.
+        Load a dataset and separate it into features and target.
 
-        Parameters:
-        - data_source: Path or buffer to load the dataset from.
-        - target_column (str): Name of the target column.
-        - loader_func (function): Function to load the data (default: pd.read_csv).
-        - loader_kwargs: Additional keyword arguments passed to the loader function.
+        Parameters
+        ----------
+        data_source : str or buffer
+            Path or buffer to load the dataset from.
+        target_column : str
+            Name of the target column.
+        loader_func : callable, optional
+            Function to load data (default: `pd.read_csv`).
+        loader_kwargs : dict
+            Additional keyword arguments for `loader_func`.
+
+        Raises
+        ------
+        ValueError
+            If the target column is not found in the dataset.
         """
         df = loader_func(data_source, **loader_kwargs)
         if target_column not in df.columns:
@@ -46,13 +62,21 @@ class ModelManager(AbstractModelManager):
         self.y = df[target_column]
 
     @log_method
-    def set_features_and_target(self, X: pd.DataFrame, y: pd.Series):
+    def set_features_and_target(self, X: pd.DataFrame, y: pd.Series) -> None:
         """
-        Manually set the features and target data.
+        Manually set the feature matrix and target vector.
 
-        Parameters:
-        - X (pd.DataFrame): Feature data.
-        - y (pd.Series): Target labels.
+        Parameters
+        ----------
+        X : pd.DataFrame
+            Feature data.
+        y : pd.Series
+            Target labels.
+
+        Raises
+        ------
+        ValueError
+            If the number of samples in X and y do not match.
         """
         if X.shape[0] != len(y):
             raise ValueError("Mismatch between X rows and y length.")
@@ -60,15 +84,20 @@ class ModelManager(AbstractModelManager):
 
     @log_method
     @require_data
-    def split_data(self, test_size=0.2, random_state=None, stratify=False, **kwargs):
+    def split_data(self, test_size=0.2, random_state=None, stratify=False, **kwargs) -> None:
         """
-        Split the dataset into training and testing sets.
+        Split the data into training and test sets.
 
-        Parameters:
-        - test_size (float): Proportion of the dataset to include in the test split.
-        - random_state (int): Seed used by the random number generator.
-        - stratify (bool): Whether to stratify the split using the target variable.
-        - kwargs: Additional keyword arguments for `train_test_split`.
+        Parameters
+        ----------
+        test_size : float, optional
+            Proportion of the dataset to use for testing.
+        random_state : int, optional
+            Random seed for reproducibility.
+        stratify : bool, optional
+            Whether to stratify by target variable.
+        kwargs : dict
+            Additional parameters for `train_test_split`.
         """
         stratify_target = self.y if stratify else None
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
@@ -81,54 +110,70 @@ class ModelManager(AbstractModelManager):
 
     @log_method
     @require_split
-    def scale_data(self, scaler=None):
+    def scale_data(self, scaler=None) -> None:
         """
-        Scale the training and testing feature sets using a given scaler.
+        Apply scaling to the training and testing feature data.
 
-        Parameters:
-        - scaler (object): Scaler object implementing `fit_transform` and `transform`.
-                           If None, uses the initialized scaler.
+        Parameters
+        ----------
+        scaler : object, optional
+            A scikit-learn scaler. If None, uses the existing scaler.
         """
         self.scaler = scaler or self.scaler
         self.X_train = self.scaler.fit_transform(self.X_train)
         self.X_test = self.scaler.transform(self.X_test)
 
     @log_method
-    def set_model(self, model: BaseEstimator):
+    def set_model(self, model: BaseEstimator) -> None:
         """
-        Set the machine learning model.
+        Set the estimator model to be trained.
 
-        Parameters:
-        - model (BaseEstimator): A scikit-learn compatible estimator.
+        Parameters
+        ----------
+        model : BaseEstimator
+            A scikit-learn compatible estimator.
         """
         self.model = model
 
     @log_method
     @require_split
     @require_model
-    def train_model(self, **fit_kwargs):
+    def train_model(self, **fit_kwargs) -> None:
         """
         Train the model using the training dataset.
 
-        Parameters:
-        - fit_kwargs: Additional arguments passed to the model's `fit` method.
+        Parameters
+        ----------
+        fit_kwargs : dict
+            Additional keyword arguments passed to `model.fit`.
         """
         self.model.fit(self.X_train, self.y_train, **fit_kwargs)
 
     @log_method
     @require_split
     @require_model
-    def evaluate_model(self, metrics=None, **predict_kwargs):
+    def evaluate_model(self, metrics=None, **predict_kwargs) -> dict:
         """
         Evaluate the trained model on the test dataset.
 
-        Parameters:
-        - metrics (dict): Dictionary of metric names to functions. Defaults to accuracy.
-        - predict_kwargs: Additional arguments passed to the model's `predict` method.
+        Parameters
+        ----------
+        metrics : dict, optional
+            Dictionary of metric name to callable (e.g., `accuracy_score`).
+            If None, defaults to accuracy.
+        predict_kwargs : dict
+            Additional arguments passed to `model.predict`.
+
+        Returns
+        -------
+        dict
+            A dictionary containing metric names and their computed values.
         """
         y_pred = self.model.predict(self.X_test, **predict_kwargs)
         metrics = metrics or {"Accuracy": accuracy_score}
+        results = {}
         for name, func in metrics.items():
             score = func(self.y_test, y_pred)
             logger.info(f"{name}: {score:.4f}")
-
+            results[name] = score
+        return results

@@ -2,6 +2,7 @@ from utils.config_loader import ConfigLoader
 import redis
 import pickle
 
+
 def get_redis_client():
     cfg = ConfigLoader.get_redis_config()
     return redis.StrictRedis(host=cfg["host"], port=cfg["port"], db=cfg["db"])

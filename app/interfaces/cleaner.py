@@ -6,36 +6,47 @@ from app.abstract.abstract_interfaces import AbstractDataFrameCleaner
 
 class DataFrameCleaner(AbstractDataFrameCleaner):
     """
-    Provides common data cleaning methods for a pandas DataFrame.
+    A class for performing common data cleaning operations on a pandas DataFrame.
     
-    Parameters
+    Attributes
     ----------
     df : pd.DataFrame
-        The input raw DataFrame to be cleaned.
+        Internal copy of the input DataFrame used for transformations.
     """
 
-    def __init__(self, df: pd.DataFrame):
-        self.df = df.copy()
+    def __init__(self, dataframe: pd.DataFrame):
+        """
+        Initialize the DataFrameCleaner with a copy of the provided DataFrame.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The raw input DataFrame to clean.
+        """
+        if not isinstance(dataframe, pd.DataFrame):
+            raise TypeError("Expected a pandas DataFrame.")
+        self.df = dataframe.copy()
 
     @log_method
     def drop_missing(self, axis=0, how='any', thresh=None, subset=None):
         """
-        Drop rows or columns with missing values.
+        Drop rows or columns with missing (NaN) values.
 
         Parameters
         ----------
-        axis : int
+        axis : int, default=0
             0 to drop rows, 1 to drop columns.
-        how : str
-            'any' to drop if any missing, 'all' if all missing.
-        thresh : int
-            Require that many non-NA values.
-        subset : list
-            Specify columns to check for NA.
+        how : str, default='any'
+            'any' drops if any value is missing, 'all' drops if all are missing.
+        thresh : int, optional
+            Require that many non-NA values to retain the row/column.
+        subset : list of str, optional
+            Labels along the axis to consider for NA checks.
 
         Returns
         -------
-        self
+        self : DataFrameCleaner
+            The updated cleaner instance.
         """
         self.df.dropna(axis=axis, how=how, thresh=thresh, subset=subset, inplace=True)
         return self
@@ -44,21 +55,24 @@ class DataFrameCleaner(AbstractDataFrameCleaner):
     @validate_columns_exist
     def fill_missing(self, strategy='mean', columns=None):
         """
-        Fill missing values using a specified strategy.
+        Fill missing values using a specified imputation strategy.
 
         Parameters
         ----------
-        strategy : str
-            One of 'mean', 'median', 'most_frequent', or 'constant'.
-        columns : list
-            Columns to apply imputation on.
+        strategy : str, default='mean'
+            Strategy to use: 'mean', 'median', 'most_frequent', or 'constant'.
+        columns : list of str, optional
+            Columns to apply the imputation. Defaults to all numeric columns.
 
         Returns
         -------
-        self
+        self : DataFrameCleaner
+            The updated cleaner instance.
         """
         if columns is None:
             columns = self.df.select_dtypes(include='number').columns
+        
+        # Impute missing values with the chosen strategy
         imputer = SimpleImputer(strategy=strategy)
         self.df[columns] = imputer.fit_transform(self.df[columns])
         return self
@@ -66,18 +80,19 @@ class DataFrameCleaner(AbstractDataFrameCleaner):
     @log_method
     def drop_duplicates(self, subset=None, keep='first'):
         """
-        Drop duplicate rows.
+        Remove duplicate rows from the DataFrame.
 
         Parameters
         ----------
-        subset : list, optional
+        subset : list of str, optional
             Columns to consider for identifying duplicates.
-        keep : str
-            'first', 'last', or False to drop all duplicates.
+        keep : {'first', 'last', False}, default='first'
+            Determines which duplicates to keep.
 
         Returns
         -------
-        self
+        self : DataFrameCleaner
+            The updated cleaner instance.
         """
         self.df.drop_duplicates(subset=subset, keep=keep, inplace=True)
         return self
@@ -85,16 +100,17 @@ class DataFrameCleaner(AbstractDataFrameCleaner):
     @log_method
     def rename_columns(self, rename_dict):
         """
-        Rename columns in the DataFrame.
+        Rename one or more columns using a mapping dictionary.
 
         Parameters
         ----------
         rename_dict : dict
-            Mapping from old column names to new ones.
+            Dictionary mapping existing column names to new names.
 
         Returns
         -------
-        self
+        self : DataFrameCleaner
+            The updated cleaner instance.
         """
         self.df.rename(columns=rename_dict, inplace=True)
         return self
@@ -103,16 +119,17 @@ class DataFrameCleaner(AbstractDataFrameCleaner):
     @validate_columns_exist
     def drop_columns(self, columns):
         """
-        Drop specified columns.
+        Remove specified columns from the DataFrame.
 
         Parameters
         ----------
-        columns : list
-            Column names to drop.
+        columns : list of str
+            Column names to be dropped.
 
         Returns
         -------
-        self
+        self : DataFrameCleaner
+            The updated cleaner instance.
         """
         self.df.drop(columns=columns, inplace=True)
         return self
@@ -124,12 +141,13 @@ class DataFrameCleaner(AbstractDataFrameCleaner):
 
         Parameters
         ----------
-        drop : bool
-            Drop the old index or not.
+        drop : bool, default=True
+            If True, do not insert the old index as a column.
 
         Returns
         -------
-        self
+        self : DataFrameCleaner
+            The updated cleaner instance.
         """
         self.df.reset_index(drop=drop, inplace=True)
         return self
@@ -137,29 +155,31 @@ class DataFrameCleaner(AbstractDataFrameCleaner):
     @log_method
     def get_df(self):
         """
-        Get the cleaned DataFrame.
+        Return the cleaned DataFrame.
 
         Returns
         -------
         pd.DataFrame
+            The current state of the DataFrame.
         """
         return self.df
 
     @log_method
     def to_csv(self, path, index=False):
         """
-        Export the cleaned DataFrame to a CSV file.
+        Save the cleaned DataFrame to a CSV file.
 
         Parameters
         ----------
         path : str
-            Destination file path.
-        index : bool
-            Whether to write row names (index).
+            File path to write the CSV to.
+        index : bool, default=False
+            Whether to include the index in the CSV output.
 
         Returns
         -------
-        self
+        self : DataFrameCleaner
+            The cleaner instance, unchanged.
         """
         self.df.to_csv(path, index=index)
         return self

@@ -3,24 +3,48 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from app.abstract.abstract_interfaces import AbstractVisualization
 from app.utils.log_config import log_method 
+from app.utils.utils_visualization import ensure_numeric_columns
 
 
 class Visualization(AbstractVisualization):
-    """Classe per la visualizzazione dei dati."""
+    """Class for visualizing data."""
     
-    def __init__(self, df):
-        if not isinstance(df, pd.DataFrame):
+    def __init__(self, dataframe: pd.DataFrame):
+        """
+        Initialize the Visualization object with a pandas DataFrame.
+
+        Parameters:
+        df: The dataset to visualize, should be a pandas DataFrame.
+        
+        Raises:
+        TypeError: If the input is not a pandas DataFrame.
+        """
+        if not isinstance(dataframe, pd.DataFrame):
             raise TypeError("Expected a pandas DataFrame.")
-        self.df = df
+        self.df = dataframe.copy()
 
     @log_method
     def split_numerical_categorical(self):
+        """
+        Split the DataFrame into numerical and categorical columns.
+
+        Returns:
+        A tuple containing:
+        - df_num: DataFrame with numerical columns (int, float).
+        - df_cat: DataFrame with categorical columns (object, category).
+        """
         df_num = self.df.select_dtypes(include=['int64', 'float64'])
         df_cat = self.df.select_dtypes(include=['object', 'category'])
         return df_num, df_cat
 
     @log_method
     def histplot(self):
+        """
+        Plot histograms for all columns in the DataFrame. 
+        If the column is numerical, the plot will include a KDE (Kernel Density Estimate). 
+        For categorical columns, it will show a histogram of the category frequencies.
+        The histograms are displayed in a grid layout.
+        """
         df = self.df
         all_cols = df.columns
         n_cols = 3
@@ -45,6 +69,10 @@ class Visualization(AbstractVisualization):
 
     @log_method
     def boxplot(self):
+        """
+        Plot boxplots for all numerical columns in the DataFrame.
+        Boxplots are displayed in a grid layout.
+        """
         df_num, _ = self.split_numerical_categorical()
 
         n_cols = 3
@@ -64,7 +92,13 @@ class Visualization(AbstractVisualization):
         plt.show()
 
     @log_method
+    @ensure_numeric_columns
     def correlation_matrix(self):
+        """
+        Plot the correlation matrix for all numerical columns.
+        The matrix will show pairwise correlations between numerical variables.
+        A heatmap is used to visualize the correlations.
+        """
         df_num, _ = self.split_numerical_categorical()
         matrix = df_num.corr()
 
@@ -75,6 +109,12 @@ class Visualization(AbstractVisualization):
 
     @log_method
     def violin_plot(self):
+        """
+        Plot violin plots for all numerical columns.
+        Violin plots combine aspects of boxplots and density plots to show 
+        the distribution of numerical variables.
+        The plots are displayed in a grid layout.
+        """
         df_num, _ = self.split_numerical_categorical()
 
         n_cols = 3

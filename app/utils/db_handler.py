@@ -2,6 +2,7 @@ from utils.config_loader import ConfigLoader
 from sqlalchemy import create_engine
 import pandas as pd
 
+
 def get_engine():
     cfg = ConfigLoader.get_mysql_config()
     uri = f"mysql+pymysql://{cfg['user']}:{cfg['password']}@{cfg['host']}/{cfg['database']}"
