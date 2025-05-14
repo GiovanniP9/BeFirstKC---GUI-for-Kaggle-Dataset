@@ -1,4 +1,3 @@
-# tabs/load_tab.py
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QComboBox, QSpinBox, QTableWidget, QTableWidgetItem

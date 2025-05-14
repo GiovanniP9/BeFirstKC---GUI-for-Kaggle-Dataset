@@ -1,4 +1,3 @@
-# tabs/submission_tab.py
 import pandas as pd
 
 from PyQt5.QtWidgets import (

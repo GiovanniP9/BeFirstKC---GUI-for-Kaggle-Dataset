@@ -1,4 +1,3 @@
-# widgets.py
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 class AnimatedButton(QtWidgets.QPushButton):

@@ -1,4 +1,3 @@
-# tabs/encode_tab.py
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QComboBox, QPushButton, QListWidget, QCheckBox, QMessageBox
