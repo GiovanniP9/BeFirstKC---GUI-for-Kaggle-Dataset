@@ -6,7 +6,7 @@ from PyQt5.QtGui import QFontDatabase, QFont
 from data_analysis_tool import DataAnalysisTool
 
 def main():
-    """Punto di ingresso dell'applicazione."""
+    # Punto di ingresso dell'applicazione.
     app = QApplication(sys.argv)
 
     # Registra il font Roboto

@@ -35,7 +35,7 @@ from tabs.model_tab import ModelTab
 from tabs.submission_tab import SubmissionTab
 
 class DataAnalysisTool(QMainWindow):
-    """Finestra principale che gestisce lo stato dei dati e incapsula tutta la logica."""
+    # Finestra principale che gestisce lo stato dei dati e incapsula tutta la logica.
     def __init__(self):
         super().__init__()
         # Attributi di stato
@@ -52,7 +52,7 @@ class DataAnalysisTool(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        """Inizializza le tab e configura la finestra."""
+        # Inizializza le tab e configura la finestra.
         self.setWindowTitle('BeFirstKC')
         self.setGeometry(100, 100, 1300, 900)
 
@@ -82,10 +82,8 @@ class DataAnalysisTool(QMainWindow):
         self.show()
 
     def on_load_target_changed(self, idx):
-        """
-        Quando cambiamo il combo nel LoadTab, seleziono
-        lo stesso target nel combo_target di ModelTab.
-        """
+        # Quando cambiamo il combo nel LoadTab, seleziono
+        # lo stesso target nel combo_target di ModelTab.
         text = self.combo_load_target.currentText()
         # Trovo l’indice corrispondente in combo_target
         tgt_idx = self.combo_target.findText(text)
@@ -93,13 +91,13 @@ class DataAnalysisTool(QMainWindow):
             self.combo_target.setCurrentIndex(tgt_idx)
     
     def check_enable_tabs(self, idx):
-        """Abilita tutte le tab se è stato selezionato un target valido."""
+        # Abilita tutte le tab se è stato selezionato un target valido.
         if idx > 0:  # >0 significa che è stato selezionato un target reale
             for i in range(self.tabs.count()):
                 self.tabs.setTabEnabled(i, True)
 
     def load_file(self, which):
-        """Carica train o test dataset tramite file dialog."""
+        # Carica train o test dataset tramite file dialog.
         fn, _ = QFileDialog.getOpenFileName(
             self, f'Load {which.title()} Dataset', '',
             'CSV Files (*.csv);;All Files (*)'
@@ -121,7 +119,7 @@ class DataAnalysisTool(QMainWindow):
             traceback.print_exc()
 
     def update_head_view(self):
-        """Aggiorna la tabella di preview e le statistiche numeric."""
+        # Aggiorna la tabella di preview e le statistiche numeric.
         ds = self.combo_head_ds.currentText().lower()
         df = getattr(self, f"{ds}_df")
         if df is None:
@@ -155,7 +153,7 @@ class DataAnalysisTool(QMainWindow):
             self.table_describe.resizeColumnsToContents()
 
     def update_pp_info(self):
-        """Aggiorna info e lista colonne nella tab Preprocess."""
+        # Aggiorna info e lista colonne nella tab Preprocess.
         ds = self.combo_pp_ds.currentText()
         # Selezione colonne numeriche in base al dataset scelto
         if ds == 'Train':
@@ -193,7 +191,7 @@ class DataAnalysisTool(QMainWindow):
             self.text_nan.clear()
 
     def apply_yeo(self):
-        """Applica Yeo–Johnson alle colonne selezionate."""
+        # Applica Yeo–Johnson alle colonne selezionate.
         ds = self.combo_pp_ds.currentText()
         sel = [i.text() for i in self.list_pp_cols.selectedItems()]
         cols = [c for c in sel if c != self.combo_target.currentText()]
@@ -231,7 +229,7 @@ class DataAnalysisTool(QMainWindow):
         self.update_viz()
 
     def apply_std(self):
-        """Applica StandardScaler alle colonne selezionate."""
+        # Applica StandardScaler alle colonne selezionate.
         ds = self.combo_pp_ds.currentText()
         sel = [i.text() for i in self.list_pp_cols.selectedItems()]
         cols = [c for c in sel if c != self.combo_target.currentText()]
@@ -256,7 +254,7 @@ class DataAnalysisTool(QMainWindow):
         self.update_viz()
 
     def pp_dropna(self):
-        """Rimuove i valori NaN."""
+        # Rimuove i valori NaN.
         ds = self.combo_pp_ds.currentText()
         if ds == 'Both':
             if self.train_df is not None:
@@ -270,7 +268,7 @@ class DataAnalysisTool(QMainWindow):
         self.update_pp_info()
 
     def pp_impute(self):
-        """Imputa valori numerici con mean/median/mode."""
+        # Imputa valori numerici con mean/median/mode.
         ds = self.combo_pp_ds.currentText()
         m = self.combo_imp.currentText()
         targets = []
@@ -295,11 +293,11 @@ class DataAnalysisTool(QMainWindow):
         self.update_pp_info()
 
     def get_pp_df(self):
-        """Restituisce il DataFrame di preprocessing attivo."""
+        # Restituisce il DataFrame di preprocessing attivo.
         return self.train_df if self.combo_pp_ds.currentText() == 'Train' else self.test_df
 
     def update_cat_imp(self):
-        """Aggiorna le colonne categoriali nella tab Impute Cat."""
+        # Aggiorna le colonne categoriali nella tab Impute Cat.
         ds = self.combo_cat_imp_ds.currentText()
         self.list_cat_imp_cols.clear()
         cols = []
@@ -318,7 +316,7 @@ class DataAnalysisTool(QMainWindow):
         self.list_cat_imp_cols.addItems(cols)
 
     def apply_cat_impute(self):
-        """Imputa valori categoriali con modalità, costante o random."""
+        # Imputa valori categoriali con modalità, costante o random.
         strategy = self.combo_cat_imp_strategy.currentText()
         cols = [i.text() for i in self.list_cat_imp_cols.selectedItems()]
         if not cols:
@@ -350,7 +348,7 @@ class DataAnalysisTool(QMainWindow):
         self._lists()
 
     def update_enc(self):
-        """Aggiorna le colonne categoriali nella tab Encode."""
+        # Aggiorna le colonne categoriali nella tab Encode.
         ds = self.combo_enc_ds.currentText()
         self.list_enc.clear()
         cols = []
@@ -369,7 +367,7 @@ class DataAnalysisTool(QMainWindow):
         self.list_enc.addItems(cols)
 
     def apply_enc(self):
-        """Applica Label e OneHot encoding alle colonne selezionate."""
+        # Applica Label e OneHot encoding alle colonne selezionate.
         cols = [i.text() for i in self.list_enc.selectedItems()]
         if not cols:
             QMessageBox.warning(self, 'Encode', 'No columns selected')
@@ -407,14 +405,14 @@ class DataAnalysisTool(QMainWindow):
         self.update_all_lists()
 
     def update_viz(self):
-        """Aggiorna la lista delle colonne numeriche per la tab Visualize."""
+        # Aggiorna la lista delle colonne numeriche per la tab Visualize.
         df = self.train_df if self.combo_viz_ds.currentText()=='Train' else self.test_df
         self.list_viz_cols.clear()
         if df is not None:
             self.list_viz_cols.addItems(df.select_dtypes(include=np.number).columns)
 
     def plot_viz(self):
-        """Genera il grafico selezionato (Histogram, Boxplot, Correlation)."""
+        # Genera il grafico selezionato (Histogram, Boxplot, Correlation).
         df = self.train_df if self.combo_viz_ds.currentText()=='Train' else self.test_df
         cols = [i.text() for i in self.list_viz_cols.selectedItems()]
         if df is None or not cols:
@@ -441,7 +439,7 @@ class DataAnalysisTool(QMainWindow):
         self.canvas.draw()
 
     def update_all_lists(self):
-        """Aggiorna tutte le liste di colonne e dropdown (preprocess/model/submission)."""
+        # Aggiorna tutte le liste di colonne e dropdown (preprocess/model/submission).
         cols = list(self.train_df.columns) if self.train_df is not None else []
         # Preprocess & drop
         self.list_pp_cols.clear()
@@ -482,7 +480,7 @@ class DataAnalysisTool(QMainWindow):
         self.update_viz()
 
     def model_drop(self):
-        """Rimuove le colonne selezionate prima dell'addestramento."""
+        # Rimuove le colonne selezionate prima dell'addestramento.
         to_drop = [i.text() for i in self.list_model_drop.selectedItems()]
         if not to_drop:
             QMessageBox.warning(self,'Model','No columns selected')
@@ -495,7 +493,7 @@ class DataAnalysisTool(QMainWindow):
         QMessageBox.information(self,'Model',f'Dropped {to_drop}')
 
     def train_model(self):
-        """Addestra il modello scelto con i dati di train."""
+        # Addestra il modello scelto con i dati di train.
         if self.train_df is None:
             QMessageBox.warning(self,'Model','Load train data first')
             return
@@ -557,7 +555,7 @@ class DataAnalysisTool(QMainWindow):
             traceback.print_exc()
 
     def optimize_model(self):
-        """Ottimizza iperparametri via Optuna."""
+        # Ottimizza iperparametri via Optuna.
         if self.train_df is None:
             QMessageBox.warning(self,'Model','Load train data first')
             return
@@ -605,7 +603,7 @@ class DataAnalysisTool(QMainWindow):
         self.text_model_res.setPlainText(f"Best params: {self.best_params}\nBest score: {study.best_value:.4f}")
 
     def train_best(self):
-        """Addestra il modello con i migliori parametri trovati."""
+        # Addestra il modello con i migliori parametri trovati.
         if self.train_df is None or not self.best_params:
             return
         is_clf = 'Classifier' in self.combo_model.currentText()
@@ -659,7 +657,7 @@ class DataAnalysisTool(QMainWindow):
             traceback.print_exc()
 
     def save_model(self):
-        """Salva il modello in un file .pkl."""
+        # Salva il modello in un file .pkl.
         if not self.model:
             QMessageBox.warning(self,'Save Model','No model to save')
             return
@@ -673,7 +671,7 @@ class DataAnalysisTool(QMainWindow):
                 QMessageBox.critical(self,'Save Error',str(e))
 
     def generate_submission(self):
-        """Genera il file di submission CSV usando il modello addestrato."""
+        # Genera il file di submission CSV usando il modello addestrato.
         if not self.model or self.test_df is None:
             QMessageBox.warning(self,'Submission','Train model and load test data first')
             return
